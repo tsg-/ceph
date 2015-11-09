@@ -125,6 +125,33 @@ struct rgw_spawned_stacks {
 };
 
 
+#ifndef HAVE_BOOST_ASIO_COROUTINE
+#include "boost_asio_coroutine.h"
+#endif
+
+class coroutine
+{
+public:
+  /// Constructs a coroutine in its initial state.
+  coroutine() : value_(0) {}
+
+  /// Returns true if the coroutine is the child of a fork.
+  bool is_child() const { return value_ < 0; }
+
+  /// Returns true if the coroutine is the parent of a fork.
+  bool is_parent() const { return !is_child(); }
+
+  /// Returns true if the coroutine has reached its terminal state.
+  bool is_complete() const { return value_ == -1; }
+
+private:
+  friend class detail::coroutine_ref;
+  int value_;
+};
+
+
+#endif
+
 class RGWCoroutine : public RefCountedObject, public boost::asio::coroutine {
   friend class RGWCoroutinesStack;
 
